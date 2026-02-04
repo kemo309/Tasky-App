@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:tasky_app/features/auth/screens/onbording.dart';
 import 'package:tasky_app/features/auth/screens/register_screen.dart';
 import 'package:tasky_app/features/auth/screens/splash_screen.dart';
 import 'firebase_options.dart';
@@ -18,11 +19,12 @@ class TaskApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: Onboarding(),
       routes: {
         LoginScreen.routeName: (context) => LoginScreen(),
         RegisterScreen.routeName: (context) => RegisterScreen(),
         SplashScreen.routeName: (context) => SplashScreen(),
+        Onboarding.routeName: (context) => Onboarding(),
       },
     );
   }
