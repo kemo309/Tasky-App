@@ -113,9 +113,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       floatingActionButton: InkWell(
         onTap: () {
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (context) => LoginScreen()));
+          Navigator.pop(context);
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

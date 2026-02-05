@@ -1,5 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:tasky_app/features/auth/screens/onbording.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,7 +15,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 1600), () {
-      Navigator.pushReplacementNamed(context, '/login');
+      Navigator.of(context).pushReplacementNamed(Onboarding.routeName);
     });
   }
 
