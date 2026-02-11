@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tasky_app/core/app_dialog.dart';
+import 'package:tasky_app/core/helper/validator_app.dart';
 import 'package:tasky_app/core/network/result.dart';
 import 'package:tasky_app/features/auth/data/firebase/auth_firebase_database.dart';
 import 'package:tasky_app/features/auth/data/model/user_model.dart';
@@ -21,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController confirmPasswordController = TextEditingController();
 
   bool isLoading = true;
+  var formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -28,97 +30,114 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 100, left: 24, right: 24),
-        child: Column(
-          spacing: 24,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Register',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Color(0xff404147),
-              ),
-            ),
-
-            TextFormFieldWidget(
-              title: 'Username',
-              hintText: 'enter username...',
-              controller: usernameController,
-              myValidator: (value) {},
-              keyboardType: TextInputType.text,
-            ),
-
-            TextFormFieldWidget(
-              title: 'Email',
-              hintText: 'enter email...',
-              controller: emailController,
-              myValidator: (value) {},
-              keyboardType: TextInputType.emailAddress,
-            ),
-
-            TextFormFieldWidget(
-              title: 'Password',
-              hintText: 'enter password...',
-              controller: passwordController,
-              myValidator: (value) {},
-              keyboardType: TextInputType.visiblePassword,
-              obscureText: true,
-              isPassword: true,
-            ),
-
-            TextFormFieldWidget(
-              title: 'Confirm Password',
-              hintText: 'confirm password...',
-              controller: confirmPasswordController,
-              myValidator: (vaue) {},
-              keyboardType: TextInputType.visiblePassword,
-              obscureText: true,
-              isPassword: true,
-            ),
-
-            SizedBox(height: 54),
-            MaterialButton(
-              onPressed: () async {
-                try {
-                  final credential = await FirebaseAuth.instance
-                      .createUserWithEmailAndPassword(
-                        email: emailController.text,
-                        password: passwordController.text,
-                      );
-                  var userModel = UserModel(
-                    id: credential.user?.uid,
-                    userName: usernameController.text,
-                    password: passwordController.text,
-                    email: emailController.text,
-                  );
-                  await AuthFunctions.addUser(userModel);
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == 'weak-password') {
-                    print('The password provided is too weak.');
-                  } else if (e.code == 'email-already-in-use') {
-                    print('The account already exists for that email.');
-                  }
-                } catch (e) {
-                  print(e);
-                }
-              },
-              color: Color(0xff5F33E1),
-              minWidth: double.infinity,
-              height: 48,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
+        child: Form(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          key: formKey,
+          child: Column(
+            spacing: 24,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
                 'Register',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Color(0xff404147),
                 ),
               ),
-            ),
-          ],
+
+              TextFormFieldWidget(
+                title: 'Username',
+                hintText: 'enter username...',
+                controller: usernameController,
+                myValidator: ValidatorApp.validateName,
+                keyboardType: TextInputType.text,
+              ),
+
+              TextFormFieldWidget(
+                title: 'Email',
+                hintText: 'enter email...',
+                controller: emailController,
+                myValidator: ValidatorApp.validateEmail,
+                keyboardType: TextInputType.emailAddress,
+              ),
+
+              TextFormFieldWidget(
+                title: 'Password',
+                hintText: 'enter password...',
+                controller: passwordController,
+                myValidator: ValidatorApp.validatePassword,
+                keyboardType: TextInputType.visiblePassword,
+                obscureText: true,
+                isPassword: true,
+              ),
+
+              TextFormFieldWidget(
+                title: 'Confirm Password',
+                hintText: 'confirm password...',
+                controller: confirmPasswordController,
+                myValidator: (val) => ValidatorApp.validateConfirmPassword(
+                  val,
+                  passwordController.text,
+                ),
+                keyboardType: TextInputType.visiblePassword,
+                obscureText: true,
+                isPassword: true,
+              ),
+
+              SizedBox(height: 54),
+              MaterialButton(
+                onPressed: () async {
+                  AppDialog.showLoading(context);
+
+                  try {
+                    final credential = await FirebaseAuth.instance
+                        .createUserWithEmailAndPassword(
+                          email: emailController.text,
+                          password: passwordController.text,
+                        );
+                    var userModel = UserModel(
+                      id: credential.user?.uid,
+                      userName: usernameController.text,
+                      password: passwordController.text,
+                      email: emailController.text,
+                    );
+                    await AuthFunctions.addUser(userModel);
+                    // اقفل الـ loading
+                    Navigator.of(context).pop();
+
+                    // روح على Login
+                    Navigator.pushReplacementNamed(
+                      context,
+                      LoginScreen.routeName,
+                    );
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == 'weak-password') {
+                      print('The password provided is too weak.');
+                    } else if (e.code == 'email-already-in-use') {
+                      print('The account already exists for that email.');
+                    }
+                  } catch (e) {
+                    print(e);
+                  }
+                },
+                color: Color(0xff5F33E1),
+                minWidth: double.infinity,
+                height: 48,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Register',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: InkWell(

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tasky_app/core/app_dialog.dart';
+import 'package:tasky_app/core/helper/validator_app.dart';
 import 'package:tasky_app/core/network/result.dart';
 import 'package:tasky_app/features/auth/data/firebase/auth_firebase_database.dart';
 import 'package:tasky_app/features/auth/screens/home_screen.dart';
@@ -18,62 +19,68 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  var formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 100, left: 24, right: 24),
-        child: Column(
-          spacing: 24,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Login',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Color(0xff404147),
-              ),
-            ),
-
-            TextFormFieldWidget(
-              title: 'Email',
-              hintText: 'enter email...',
-              controller: emailController,
-              myValidator: (value) {},
-              keyboardType: TextInputType.emailAddress,
-            ),
-
-            TextFormFieldWidget(
-              title: 'Password',
-              hintText: 'enter password...',
-              controller: passwordController,
-              myValidator: (value) {},
-              keyboardType: TextInputType.visiblePassword,
-              obscureText: true,
-              isPassword: true,
-            ),
-
-            SizedBox(height: 54),
-            MaterialButton(
-              onPressed: _login,
-              color: Color(0xff5F33E1),
-              minWidth: double.infinity,
-              height: 48,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
+        child: Form(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          key: formKey,
+          child: Column(
+            spacing: 24,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
                 'Login',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Color(0xff404147),
                 ),
               ),
-            ),
-          ],
+
+              TextFormFieldWidget(
+                title: 'Email',
+                hintText: 'enter email...',
+                controller: emailController,
+                myValidator: ValidatorApp.validateEmail,
+                keyboardType: TextInputType.emailAddress,
+              ),
+
+              TextFormFieldWidget(
+                title: 'Password',
+                hintText: 'enter password...',
+                controller: passwordController,
+                myValidator: ValidatorApp.validatePassword,
+                keyboardType: TextInputType.visiblePassword,
+                obscureText: true,
+                isPassword: true,
+              ),
+
+              SizedBox(height: 54),
+              MaterialButton(
+                onPressed: _login,
+                color: Color(0xff5F33E1),
+                minWidth: double.infinity,
+                height: 48,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Login',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: InkWell(
@@ -109,18 +116,20 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() async {
-    AppDialog.showLoading(context);
-    final result = await AuthFunctions.loginUser(
-      email: emailController.text,
-      password: passwordController.text,
-    );
-    Navigator.of(context).pop();
-    switch (result) {
-      case Success<String>():
-        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-      case ErrorState<String>():
-        AppDialog.showError(context: context, message: result.error);
-        break;
+    if (formKey.currentState!.validate()) {
+      AppDialog.showLoading(context);
+      final result = await AuthFunctions.loginUser(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      Navigator.of(context).pop();
+      switch (result) {
+        case Success<String>():
+          Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+        case ErrorState<String>():
+          AppDialog.showError(context: context, message: result.error);
+          break;
+      }
     }
   }
 }
