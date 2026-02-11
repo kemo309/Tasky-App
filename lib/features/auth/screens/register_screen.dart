@@ -1,5 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:tasky_app/core/app_dialog.dart';
+import 'package:tasky_app/core/network/result.dart';
+import 'package:tasky_app/features/auth/data/firebase/auth_firebase_database.dart';
+import 'package:tasky_app/features/auth/data/model/user_model.dart';
 import 'package:tasky_app/features/auth/screens/login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -15,6 +19,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+
+  bool isLoading = true;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               title: 'Confirm Password',
               hintText: 'confirm password...',
               controller: confirmPasswordController,
-              myValidator: (value) {},
+              myValidator: (vaue) {},
               keyboardType: TextInputType.visiblePassword,
               obscureText: true,
               isPassword: true,
@@ -74,15 +80,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
             SizedBox(height: 54),
             MaterialButton(
               onPressed: () async {
-                print(usernameController.text);
-                print(emailController.text);
-                print(passwordController.text);
                 try {
                   final credential = await FirebaseAuth.instance
                       .createUserWithEmailAndPassword(
                         email: emailController.text,
                         password: passwordController.text,
                       );
+                  var userModel = UserModel(
+                    id: credential.user?.uid,
+                    userName: usernameController.text,
+                    password: passwordController.text,
+                    email: emailController.text,
+                  );
+                  await AuthFunctions.addUser(userModel);
                 } on FirebaseAuthException catch (e) {
                   if (e.code == 'weak-password') {
                     print('The password provided is too weak.');
@@ -139,6 +149,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+
+  void _registerUser() async {
+    AppDialog.showLoading(context);
+    final result = await AuthFunctions.registerUser(
+      user: UserModel(
+        email: emailController.text,
+        password: passwordController.text,
+        userName: usernameController.text,
+      ),
+    );
+    Navigator.of(context).pop();
+    switch (result) {
+      case Success<UserModel>():
+        Navigator.of(context).pop();
+      case ErrorState<UserModel>():
+        AppDialog.showError(context: context, message: result.error);
+    }
   }
 }
 

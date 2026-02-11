@@ -1,5 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:tasky_app/core/app_dialog.dart';
+import 'package:tasky_app/core/network/result.dart';
+import 'package:tasky_app/features/auth/data/firebase/auth_firebase_database.dart';
+import 'package:tasky_app/features/auth/screens/home_screen.dart';
 import 'package:tasky_app/features/auth/screens/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -53,23 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             SizedBox(height: 54),
             MaterialButton(
-              onPressed: () async {
-                try {
-                  final credential = await FirebaseAuth.instance
-                      .createUserWithEmailAndPassword(
-                        email: emailController.text,
-                        password: passwordController.text,
-                      );
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == 'weak-password') {
-                    print('The password provided is too weak.');
-                  } else if (e.code == 'email-already-in-use') {
-                    print('The account already exists for that email.');
-                  }
-                } catch (e) {
-                  print(e);
-                }
-              },
+              onPressed: _login,
               color: Color(0xff5F33E1),
               minWidth: double.infinity,
               height: 48,
@@ -119,6 +107,22 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
+  void _login() async {
+    AppDialog.showLoading(context);
+    final result = await AuthFunctions.loginUser(
+      email: emailController.text,
+      password: passwordController.text,
+    );
+    Navigator.of(context).pop();
+    switch (result) {
+      case Success<String>():
+        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+      case ErrorState<String>():
+        AppDialog.showError(context: context, message: result.error);
+        break;
+    }
+  }
 }
 
 typedef Validator = String? Function(String?);
@@ -151,7 +155,7 @@ class _TextFormFieldWidgetState extends State<TextFormFieldWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 2,
       children: [
         Text(
