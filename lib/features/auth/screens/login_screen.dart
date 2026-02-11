@@ -4,7 +4,7 @@ import 'package:tasky_app/core/app_dialog.dart';
 import 'package:tasky_app/core/helper/validator_app.dart';
 import 'package:tasky_app/core/network/result.dart';
 import 'package:tasky_app/features/auth/data/firebase/auth_firebase_database.dart';
-import 'package:tasky_app/features/auth/screens/home_screen.dart';
+import 'package:tasky_app/features/home/screens/home_screen.dart';
 import 'package:tasky_app/features/auth/screens/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {

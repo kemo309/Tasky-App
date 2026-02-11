@@ -28,15 +28,15 @@ class AppDialog {
   }) {
     showDialog(
       context: context,
-      barrierDismissible: true, // المستخدم يقدر يقفل بالضغط برا أو على الزرار
-      barrierColor: Colors.black.withOpacity(0.3), // خلفية معتمة
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.3),
       builder: (_) {
         return Center(
           child: Container(
             width: 280,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white, // المربع الأبيض
+              color: Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(

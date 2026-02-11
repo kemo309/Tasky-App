@@ -1,5 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tasky_app/features/auth/screens/home_screen.dart';
+import 'package:tasky_app/features/home/screens/home_screen.dart';
 import 'package:tasky_app/features/auth/screens/onbording.dart';
 import 'package:tasky_app/features/auth/screens/register_screen.dart';
 import 'package:tasky_app/features/auth/screens/splash_screen.dart';
